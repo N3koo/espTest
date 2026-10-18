@@ -1,0 +1,10 @@
+{
+    // PlatformIO regenerates c_cpp_properties.json with a trailing "" in compilerArgs, which breaks
+    // IntelliSense's compiler query. Use the compile database written by the ESP-IDF build instead
+    // (run a build once after cloning), and strip host-OS macros that IntelliSense still injects
+    // (__APPLE__ on macOS, _WIN32/_MSC_VER on Windows) so ESP-IDF headers take the ESP32 paths.
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/.pio/build/esp32/compile_commands.json",
+    "C_Cpp.default.forcedInclude": ["${workspaceFolder}/.vscode/intellisense_target.h"],
+    "C_Cpp.default.intelliSenseMode": "gcc-x86",
+    "C_Cpp.errorSquiggles": "enabled"
+}

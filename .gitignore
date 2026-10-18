@@ -3,3 +3,14 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+
+# ModusToolbox (XMC1100)
+mtb_shared/
+platform/xmc1100/build/
+platform/xmc1100/libs/
+platform/xmc1100/.vscode/
+platform/xmc1100/.ninja_log
+platform/xmc1100/.mtbqueryapi
+
+# macOS
+.DS_Store
