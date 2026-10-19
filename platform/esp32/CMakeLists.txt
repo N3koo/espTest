@@ -5,7 +5,7 @@ FILE(GLOB_RECURSE app_sources
 
 idf_component_register(SRCS ${app_sources}
                        INCLUDE_DIRS "." "../.." "../../app"
-                       REQUIRES esp_driver_gpio freertos)
+                       REQUIRES esp_driver_gpio freertos esp_adc)
 
 # No-op for the xtensa compiler, which never defines these. VS Code IntelliSense injects host-OS
 # macros when parsing, which sends ESP-IDF headers (esp_attr.h) down macOS-only paths. These flags

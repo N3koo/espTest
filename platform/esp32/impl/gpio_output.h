@@ -1,6 +1,7 @@
 #pragma once
-#include "driver/gpio.h"
+
 #include "interfaces/interfaces.h"
+#include "driver/gpio.h"
 
 class GpioOutput final : public IOutput {
     public:
