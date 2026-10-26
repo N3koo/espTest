@@ -21,7 +21,7 @@ class EspTemperature final : public ITemperatureSensor {
                 .bitwidth = ADC_BITWIDTH_DEFAULT
             };
 
-            adc_cali_line_fitting_config_t cali_handle = {
+            adc_cali_line_fitting_config_t cali_config = {
                 .unit_id = ADC_UNIT_1,
                 .atten = ADC_ATTEN_DB_12,
                 .bitwidth = ADC_BITWIDTH_DEFAULT,
@@ -30,7 +30,7 @@ class EspTemperature final : public ITemperatureSensor {
 
             ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config, &adc_handle_));
             ESP_ERROR_CHECK(adc_oneshot_config_channel(adc_handle_, channel_, &chan_config));
-            ESP_ERROR_CHECK(adc_cali_create_scheme_line_fitting(&cali_handle, &adc_cali_handle_));
+            ESP_ERROR_CHECK(adc_cali_create_scheme_line_fitting(&cali_config, &adc_cali_handle_));
         }
 
         int16_t readCelsius() const override {
@@ -61,9 +61,10 @@ class EspTemperature final : public ITemperatureSensor {
         static constexpr int32_t V_MIN_MV = 150;  // Minimum voltage in mV
         static constexpr int32_t V_MAX_MV = 3500; // Maximum voltage in mV
         static constexpr int32_t T_MIN_C = 0;    // Minimum temperature in Celsius
-        static constexpr int32_t T_MAX_C  = 1000; // Maximum temperature in Celsius
+        static constexpr int32_t T_MAX_C  = 100; // Maximum temperature in Celsius
         static constexpr int32_t SAMPLES = 16; // Number of samples for averaging
         static constexpr int16_t SENSOR_FAULT = INT16_MIN; // Error value for temperature reading
+        static constexpr int32_t MAX_ADC_VALUE = 4095; // Maximum ADC value for 12-bit resolution
 
-        static_assert(SAMPLES * 4095 < INT32_MAX, "SAMPLES * 4095 must be less than INT32_MAX to avoid overflow");
+        static_assert(SAMPLES * MAX_ADC_VALUE < INT32_MAX, "SAMPLES * MAX_ADC_VALUE must be less than INT32_MAX to avoid overflow");
 };
