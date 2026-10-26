@@ -3,9 +3,9 @@
 #include "interfaces/interfaces.h"
 #include "driver/gpio.h"
 
-class GpioOutput final : public IOutput {
+class EspOutput final : public IOutput {
     public:
-        explicit GpioOutput(gpio_num_t pin) : pin_(pin) {}
+        explicit EspOutput(gpio_num_t pin) : pin_(pin) {}
 
         void init() {
             gpio_reset_pin(pin_);

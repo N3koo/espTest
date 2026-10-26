@@ -1,7 +1,7 @@
-#include "impl/gpio_output.h"
+#include "impl/esp_output.h"
 #include "freertos/FreeRTOS.h"
 
-static GpioOutput led(GPIO_NUM_2);
+static EspOutput led(GPIO_NUM_2);
 
 extern "C" void app_main() {
     led.init();
