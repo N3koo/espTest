@@ -1,0 +1,24 @@
+#!/bin/bash
+# Git pre-commit hook: blocks commits until the embedded-review skill has approved exactly the
+# changes being committed. Same check as .claude/hooks/require-embedded-review.sh, but it also
+# covers commits made from the terminal or the IDE. Enable once per clone with:
+#   git config core.hooksPath .githooks
+
+git_dir=$(git rev-parse --git-dir) || exit 1
+
+# Nothing staged (e.g. `git commit --amend` to reword the message): nothing to review.
+git diff --cached --quiet && exit 0
+
+# Must hash exactly what the skill hashes when it records the approval.
+staged=$(git diff --cached | shasum | cut -c1-40)
+approved=$(cat "$git_dir/embedded-review-ok" 2>/dev/null)
+
+[ -n "$approved" ] && [ "$staged" = "$approved" ] && exit 0
+
+cat >&2 <<'EOF'
+pre-commit: the staged changes have not passed the embedded review.
+Run /embedded-review in Claude Code on the staged changes, fix any blocking
+findings, then commit again. Avoid `git commit -a`: it stages extra changes
+after the review, so the approval no longer matches.
+EOF
+exit 1

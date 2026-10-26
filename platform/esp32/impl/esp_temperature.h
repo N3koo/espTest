@@ -10,8 +10,10 @@ class EspTemperature final : public ITemperatureSensor {
         explicit EspTemperature(adc_channel_t channel) : channel_(channel) {}
 
         void init() {
-            adc_oneshot_unit_init_cfg_t init_config = { 
-                .unit_id = ADC_UNIT_1 
+            adc_oneshot_unit_init_cfg_t init_config = {
+                .unit_id = ADC_UNIT_1,
+                .clk_src = ADC_RTC_CLK_SRC_DEFAULT,
+                .ulp_mode = ADC_ULP_MODE_DISABLE
             };
 
             adc_oneshot_chan_cfg_t chan_config = { 
@@ -22,7 +24,8 @@ class EspTemperature final : public ITemperatureSensor {
             adc_cali_line_fitting_config_t cali_handle = {
                 .unit_id = ADC_UNIT_1,
                 .atten = ADC_ATTEN_DB_12,
-                .bitwidth = ADC_BITWIDTH_DEFAULT
+                .bitwidth = ADC_BITWIDTH_DEFAULT,
+                .default_vref = 0
             };
 
             ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config, &adc_handle_));
@@ -34,18 +37,18 @@ class EspTemperature final : public ITemperatureSensor {
             int raw, mv, sum = 0;
             for (int i = 0; i < SAMPLES; i++) {
                 esp_err_t ret = adc_oneshot_read(adc_handle_, channel_, &raw);
-                if (ret != ESP_OK) { return ERROR_VALUE; } // Error reading ADC
+                if (ret != ESP_OK) { return SENSOR_FAULT; } // Error reading ADC
                 sum += raw;
             }
 
             esp_err_t err = adc_cali_raw_to_voltage(adc_cali_handle_, sum / SAMPLES, &mv);
-            if (err != ESP_OK) { return ERROR_VALUE; } // Error converting to voltage
+            if (err != ESP_OK) { return SENSOR_FAULT; } // Error converting to voltage
 
-            if (mv < V_MIN) { return INT16_MIN; } // Below minimum voltage, return error;
-            if (mv > V_MAX) { return INT16_MAX; } // Above maximum voltage, return error;
+            if (mv < V_MIN_MV) { return SENSOR_FAULT; } // Below minimum voltage, return error;
+            if (mv > V_MAX_MV) { return SENSOR_FAULT; } // Above maximum voltage, return error;
 
-            int32_t span = V_MAX - V_MIN;
-            int32_t temp = T_MIN + ((int32_t)(mv - V_MIN) * (T_MAX - T_MIN) + span / 2) / span;
+            int32_t span = V_MAX_MV - V_MIN_MV;
+            int32_t temp = T_MIN_C + ((int32_t)(mv - V_MIN_MV) * (T_MAX_C - T_MIN_C) + span / 2) / span;
 
             return (int16_t)temp;
         }
@@ -55,10 +58,12 @@ class EspTemperature final : public ITemperatureSensor {
         adc_cali_handle_t adc_cali_handle_ = nullptr;
         adc_channel_t channel_;
 
-        static constexpr int32_t V_MIN = 150;  // Minimum voltage in mV
-        static constexpr int32_t V_MAX = 3500; // Maximum voltage in mV
-        static constexpr int32_t T_MIN = 0;    // Minimum temperature in Celsius
-        static constexpr int32_t T_MAX = 1000; // Maximum temperature in Celsius
+        static constexpr int32_t V_MIN_MV = 150;  // Minimum voltage in mV
+        static constexpr int32_t V_MAX_MV = 3500; // Maximum voltage in mV
+        static constexpr int32_t T_MIN_C = 0;    // Minimum temperature in Celsius
+        static constexpr int32_t T_MAX_C  = 1000; // Maximum temperature in Celsius
         static constexpr int32_t SAMPLES = 16; // Number of samples for averaging
-        static constexpr int16_t ERROR_VALUE = -1; // Error value for temperature reading 
+        static constexpr int16_t SENSOR_FAULT = INT16_MIN; // Error value for temperature reading
+
+        static_assert(SAMPLES * 4095 < INT32_MAX, "SAMPLES * 4095 must be less than INT32_MAX to avoid overflow");
 };
