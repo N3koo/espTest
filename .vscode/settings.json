@@ -6,5 +6,6 @@
     "C_Cpp.default.compileCommands": "${workspaceFolder}/.pio/build/esp32/compile_commands.json",
     "C_Cpp.default.forcedInclude": ["${workspaceFolder}/.vscode/intellisense_target.h"],
     "C_Cpp.default.intelliSenseMode": "gcc-x86",
-    "C_Cpp.errorSquiggles": "enabled"
+    "C_Cpp.errorSquiggles": "enabled",
+    "files.insertFinalNewline": true
 }
